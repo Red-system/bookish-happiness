@@ -56,4 +56,3 @@ def search_prod(list):
     
     
 print(add_prod())
-print("GG René")
