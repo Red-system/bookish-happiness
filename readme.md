@@ -26,4 +26,16 @@ pip install -r requirements.tkt
 ./main.py
 ```
 
+## how to use git
+
+```
+# pull the remote changes to local
+git pull 
+# add all the changes to be committed
+git add . 
+# commit the changes with a description message
+git commit -m "my message" 
+# push the commits to master
+git push
+```
 
