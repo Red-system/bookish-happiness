@@ -7,3 +7,4 @@ if __name__ == "__main__":
     settings.migrate()
     core.start_app()
 
+print('this is develop')

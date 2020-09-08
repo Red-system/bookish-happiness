@@ -37,5 +37,12 @@ git add .
 git commit -m "my message" 
 # push the commits to master
 git push
+
+
+# list branch
+git branch -l
+# create new branch
+git checkout -b branchname
+
 ```
 
