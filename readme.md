@@ -13,6 +13,11 @@ git clone https://github.com/Red-system/bookish-happiness.git
 ```
 py -m venv vfrigo
 ```
+* ativate virtualenv in the termial session
+
+```
+./vfrigo/scripts/activate
+```
 
 ## install dependencies 
 
@@ -24,6 +29,18 @@ pip install -r requirements.tkt
 
 ```
 ./main.py
+```
+
+## make migrations
+
+```
+alembic revision --autogenerate -m "Added account table"
+```
+
+## migrate (apply the change to the database)
+
+```
+alembic upgrade head
 ```
 
 ## how to use git
@@ -43,6 +60,9 @@ git push
 git branch -l
 # create new branch
 git checkout -b branchname
-
+# push a new branch to remote repo (github)
+git push -u origin develop
+# switch branch on local
+git checkout develop
 ```
 
