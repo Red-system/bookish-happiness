@@ -2,6 +2,28 @@ from app.models import Product
 from app.settings import session
 
 
+def create_product(session, **kwargs):
+    product = Product(**kwargs)
+    session.add(product)
+    session.commit()
+
+def product_name_valid(name):
+    for l in name.replace(' ', ''):
+        if not l.isalpha():
+            return False
+    return True
+
+def enter_product(session):
+    product_name = input('Enter a product you want to add in the fridge :')
+    if not product_name_valid(product_name):
+        print('{} is not valid'.format(product_name))
+        enter_product(session)
+        return
+    if not Product.exists(session, name=product_name):
+        print("Product {} doesn't exist, do you want to add it ?".format(product_name))
+    else:
+        print( "{} has been added !".format(product_name))
+        
 def start_app():
     # product = Product(name='test') # create a product (in python code)
     # session.add(product) (convert product instance into SQL code)
@@ -10,25 +32,5 @@ def start_app():
     # for p in products:
     #     print(p) # print the product
     #     print(p.name) # print the name of the product
-    """
-    type the name of the product ?
-    - tagada
-    oh I'm sorry this product already exists
-    - 1234
-    oh not a valid name
-    - milk
-    super ! the milk has been created !
-    """
-    product = []
-    p = (input("Enter a product:"))
-    for l in p :
-        if l .isnumeric():
-            return('This name is not valid')
-        elif l not .isalpha():
-            return('This name is not valid')
-
-    
-    print(product)
-    x = input("What product are you looking for?")
-        if x in product:
+    enter_product(session)
 
