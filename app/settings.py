@@ -13,6 +13,3 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 Base = declarative_base()
-
-def migrate():
-    Base.metadata.create_all(engine)

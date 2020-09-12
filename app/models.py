@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from app.settings import Base
 
 
@@ -9,6 +9,7 @@ class Product(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
     created_at = Column(DateTime, default=datetime.datetime.now)
+    hide = Column(Boolean, default=False)
 
     @staticmethod
     def exists(session, **kwargs):
@@ -24,4 +25,4 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
     created_at = Column(DateTime, default=datetime.datetime.now)
-  
+    
