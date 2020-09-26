@@ -16,7 +16,7 @@ py -m venv vfrigo
 * ativate virtualenv in the termial session
 
 ```
-./vfrigo/scripts/activate
+./frigo/scripts/activate
 ```
 
 ## install dependencies 

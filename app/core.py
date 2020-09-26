@@ -1,36 +1,147 @@
-from app.models import Product
-from app.settings import session
+from __future__ import print_function, unicode_literals
+from PyInquirer import prompt, Separator
+from datetime import datetime, timedelta
+import timeago
 
+# https://github.com/CITGuru/PyInquirer
 
-def create_product(session, **kwargs):
-    product = Product(**kwargs)
-    session.add(product)
-    session.commit()
+def get_all_products():
+    """
+    return all product stored in the database
+    sorted by expiration date and stock
+    """
+    now = datetime.now()
+    # todo: fetch database
+    products = [
+        {
+            'id': 0,
+            'name': 'Carottes',
+            'units': 3,
+            'expires': now + timedelta(days=3)
+        },
+        {
+            'id': 0,
+            'name': 'Lait',
+            'units': 1,
+            'expires': now + timedelta(days=10)
+        },
+    ]
+    res = []
+    for product in products:
+        res.append('{num} {name} expires {date}'.format(
+            name=product['name'],
+            num=product['units'],
+            date=timeago.format(product['expires'], now),
+        ))
+    return res
 
-def product_name_valid(name):
-    for l in name.replace(' ', ''):
-        if not l.isalpha():
-            return False
-    return True
+def validate_number(num):
+    return num.isdigit()
 
-def enter_product(session):
-    product_name = input('Enter a product you want to add in the fridge :')
-    if not product_name_valid(product_name):
-        print('{} is not valid'.format(product_name))
-        enter_product(session)
-        return
-    if not Product.exists(session, name=product_name):
-        print("Product {} doesn't exist, do you want to add it ?".format(product_name))
-    else:
-        print( "{} has been added !".format(product_name))
-        
+def add_product():
+    """
+    add product ?
+     / - new
+     - 2 carottes epires in 3 days
+     - lait expires in 10 days
+     - go back to menu
+    """
+    products = get_all_products()
+    new = 'Not in the list'
+    go_back = 'Go back to menu'
+    questions = [
+    {   
+        'type': 'list',
+        'name': 'add',
+        'message': 'What product do you want to add ?',
+        'choices': [
+            new,
+            *products,
+            go_back,
+        ]
+    }
+    ]
+    answers = prompt(questions)
+    if answers['add'] == new:
+        questions = [
+            {   
+                'type': 'input',
+                'name': 'name',
+                'message': 'What product do you want to add?',
+            },
+            {   
+                'type': 'input',
+                'name': 'stock',
+                'message': 'How many would you like to add?',
+            },
+            {   
+                'type': 'input',
+                'name': 'expire',
+                'message': 'When does it expire?',
+            },
+        ]
+        answers = prompt(questions)
+        # todo: add product into the database
+    elif answers['add'] == go_back:
+        start_app()
+    elif answers['add'] in products:
+        questions = [
+            {   
+                'type': 'input',
+                'name': 'stock',
+                'validate': validate_number,
+                'message': 'How many do you want to add?',
+            }
+        ]
+        answers = prompt(questions)
+
+def get_all_recipes():
+    recipes=[
+        {
+            'id':1,
+            'name':"Tarte aux pommes",
+        },
+        {
+            'id':2,
+            'name':"Tarte aux poires",
+        }
+    ]
+    res=[]
+    for recipe in recipes:
+        res.append(recipe['name'])
+    return res
+
+def get_recipes():
+    questions = [
+        {
+            'type': 'list',
+            'name': 'name',
+            'message': 'Those are the recipes available:',
+            'choices': [
+                *get_all_recipes()
+            ]
+        },
+    ]
+    # todo: remove products linked to the recipe
+
 def start_app():
-    # product = Product(name='test') # create a product (in python code)
-    # session.add(product) (convert product instance into SQL code)
-    # session.commit() apply it to the database
-    # products = session.query(Product).all() # select all the product in database
-    # for p in products:
-    #     print(p) # print the product
-    #     print(p.name) # print the name of the product
-    enter_product(session)
+    add_product_text = 'Add product'
+    get_recipe_text = 'Get Recipes'
+    questions = [
+    {
+        'type': 'list',
+        'name': 'menu',
+        'message': 'What do you want to do?',
+        'choices': [
+            add_product_text,
+            get_recipe_text,
+        ]
+    }
+    ]
+
+    answers = prompt(questions)
+    if answers['menu'] == add_product_text:
+        add_product()
+    elif answers['menu'] == get_recipe_text:
+        get_recipes()
 
