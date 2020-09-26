@@ -49,7 +49,9 @@ alembic upgrade head
 # pull the remote changes to local
 git pull 
 # add all the changes to be committed
-git add . 
+git add .
+#add changes with reviews of changes 
+git add -p 
 # commit the changes with a description message
 git commit -m "my message" 
 # push the commits to master
