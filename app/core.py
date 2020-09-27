@@ -2,49 +2,119 @@ from __future__ import print_function, unicode_literals
 from PyInquirer import prompt, Separator
 from datetime import datetime, timedelta
 import timeago
+from app.models import Product
+from app.settings import session
+# https://docs.sqlalchemy.org/en/13/orm/tutorial.html#querying
 
-# https://github.com/CITGuru/PyInquirer
+
 
 def get_all_products():
     """
     return all product stored in the database
-    sorted by expiration date and stock
+    #odo sorted by expiration date and stock
     """
     now = datetime.now()
-    # todo: fetch database
-    products = [
-        {
-            'id': 0,
-            'name': 'Carottes',
-            'units': 3,
-            'expires': now + timedelta(days=3)
-        },
-        {
-            'id': 0,
-            'name': 'Lait',
-            'units': 1,
-            'expires': now + timedelta(days=10)
-        },
-    ]
+
+    """
+    en sql
+    select * from products
+    """
     res = []
-    for product in products:
-        res.append('{num} {name} expires {date}'.format(
-            name=product['name'],
-            num=product['units'],
-            date=timeago.format(product['expires'], now),
-        ))
+    for product in session.query(Product).all():
+        choice_text = '{num} {name} expires {date}'.format(
+            name=product.name,
+            num=product.stock,
+            date=timeago.format(product.expire, now),
+        )
+        res.append({
+            'name': choice_text,
+            'value': product,
+        })
     return res
 
 def validate_number(num):
     return num.isdigit()
 
+def validate_date(date):
+    try:
+        datetime.strptime(date, '%d/%m/%Y')
+        return True
+    except ValueError:
+        return 'The date format is invalid, please try the format : dd/mm/yyy'
+
+def add_new_product():
+    """
+    add a new product in the database from the first line of questionning
+    """
+    questions = [
+        {   
+            'type': 'input',
+            'name': 'name',
+            'message': 'What product do you want to add?',
+        },
+        {   
+            'type': 'input',
+            'name': 'stock',
+            'validate': validate_number,
+            'message': 'How many would you like to add?',
+        },
+        {   
+            'type': 'input',
+            'name': 'expire',
+            'validate': validate_date, # 02/09/2020
+            'message': 'When does it expire?',
+        },
+    ]
+    answers = prompt(questions)
+        
+    new_product = Product(
+            name=answers['name'],
+            stock=answers["stock"],
+            expire=datetime.strptime(answers['expire'], '%d/%m/%Y')
+    )
+    session.add(new_product)
+    print('{} has been added to the database'.format(new_product.name))
+    start_app()
+
+def add_existing_product(product):
+    """
+    add a new product from existind product found in database
+    """
+    questions = [
+        {   
+            'type': 'input',
+            'name': 'stock',
+            'validate': validate_number,
+            'message': 'How many do you want to add?',
+        },
+        {   
+            'type': 'input',
+            'name': 'expire',
+            'validate': validate_date, # 02/09/2020
+            'message': 'When does it expire?',
+        },
+    ]
+    
+    answers = prompt(questions) 
+
+    add_product = Product(
+            name=product.name,
+            stock=answers["stock"],
+            expire=datetime.strptime(answers['expire'], '%d/%m/%Y')
+    )
+    session.add(add_product)
+    
+    print('Your product has been added to the database')
+    
+    start_app()
+    
+   
+
 def add_product():
     """
-    add product ?
-     / - new
-     - 2 carottes epires in 3 days
-     - lait expires in 10 days
-     - go back to menu
+    ask if the use wants to add a new product 
+    or add an existing product to the database
+    or go back to the menu
     """
     products = get_all_products()
     new = 'Not in the list'
@@ -63,37 +133,11 @@ def add_product():
     ]
     answers = prompt(questions)
     if answers['add'] == new:
-        questions = [
-            {   
-                'type': 'input',
-                'name': 'name',
-                'message': 'What product do you want to add?',
-            },
-            {   
-                'type': 'input',
-                'name': 'stock',
-                'message': 'How many would you like to add?',
-            },
-            {   
-                'type': 'input',
-                'name': 'expire',
-                'message': 'When does it expire?',
-            },
-        ]
-        answers = prompt(questions)
-        # todo: add product into the database
+        add_new_product()
     elif answers['add'] == go_back:
         start_app()
-    elif answers['add'] in products:
-        questions = [
-            {   
-                'type': 'input',
-                'name': 'stock',
-                'validate': validate_number,
-                'message': 'How many do you want to add?',
-            }
-        ]
-        answers = prompt(questions)
+    elif answers['add'] in [p['value'] for p in products]:
+        add_existing_product(answers['add'])
 
 def get_all_recipes():
     recipes=[
@@ -124,7 +168,12 @@ def get_recipes():
     ]
     # todo: remove products linked to the recipe
 
+
 def start_app():
+    """
+    First line of questionning to the consumer
+    """
+
     add_product_text = 'Add product'
     get_recipe_text = 'Get Recipes'
     questions = [

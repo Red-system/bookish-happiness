@@ -10,19 +10,8 @@ class Product(Base):
     name = Column(String(250))
     created_at = Column(DateTime, default=datetime.datetime.now)
     hide = Column(Boolean, default=False)
+    stock = Column(Integer, default=0)
+    expire = Column(DateTime, default=None)
 
-    @staticmethod
-    def exists(session, **kwargs):
-        r = session.query(Product).filter_by(**kwargs).first()
-        return r is not None
-    
     def __repr__(self):
         return '{} -> {}'.format(self.id, self.name)
-
-class Category(Base):
-    __tablename__ = 'category'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250))
-    created_at = Column(DateTime, default=datetime.datetime.now)
-    
