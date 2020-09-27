@@ -57,6 +57,9 @@ git commit -m "my message"
 # push the commits to master
 git push
 
+
+#voir sur quelle branche nous sommes
+git branch
 #se positionner sur la branche desirée
 git checkout branche_name
 #merge two branches
